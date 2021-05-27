@@ -34,11 +34,14 @@ class CqiTarget(Structure):
     _pack_ = 1
     _fields_ = [('target', c_uint8)]
 
-
-Init(1234, 4096)
-dl = Ns3AIDL(1357, CqiFeature, CqiPredicted, CqiTarget)
-
-
+##
+# \brief  print to file as log.
+# 
+# \param[in] filename : the name of the input file(default: "log")
+# 
+# \param[in] print_screen : whether to print to screen or not(default: False)
+# 
+# \returns  function pointer of the new_print function
 def new_print(filename="log", print_screen=False):
     old_print = print
 
@@ -98,8 +101,13 @@ train_data = []
 is_train = True
 CQI = 0
 delay_queue = []
-exp = Experiment(1234, 4096, 'lte_cqi', '../../')
-exp.run(show_output=0)
+mempool_key = 1234          # memory pool key, arbitrary integer large than 1000
+mem_size = 4096             # memory pool size in bytes
+memblock_key = 1357         # memory block key, need to keep the same in the ns-3 script
+
+exp = Experiment(mempool_key, mem_size, 'lte_cqi', '../../')    # Set up the ns-3 environment
+dl = Ns3AIDL(memblock_key, CqiFeature, CqiPredicted, CqiTarget) # Link the shared memory block with ns-3 script
+exp.run(show_output=0)                                          # Set and run the ns-3 script
 try:
     while True:
         with dl as data:

@@ -49,10 +49,10 @@ main (int argc, char *argv[])
   uint32_t nLeaf = 1;
   std::string transport_prot = "ns3::TcpRlTimeBased";
   double error_p = 0.0;
-  std::string bottleneck_bandwidth = "2Mbps";
-  std::string bottleneck_delay = "0.01ms";
-  std::string access_bandwidth = "10Mbps";
-  std::string access_delay = "20ms";
+  std::string bottleneck_bandwidth = "2Mbps";       ///< bottleneck link bandwidth
+  std::string bottleneck_delay = "0.01ms";          ///< bottleneck link delay
+  std::string access_bandwidth = "10Mbps";          ///< access link bandwidth
+  std::string access_delay = "20ms";                ///< access link delay
   std::string prefix_file_name = "TcpVariantsComparison";
   uint64_t data_mbytes = 0;
   uint32_t mtu_bytes = 400;

@@ -5,17 +5,25 @@
 #include "ns3/tcp-socket-base.h"
 #include "ns3/ns3-ai-module.h"
 namespace ns3 {
+
+/**
+ * \brief Shared memory to store TCP RL environment.
+ * 
+ * This struct is the environment 
+ * shared between ns-3 and python with the same shared memory
+ * using the ns3-ai model.
+ */
 struct sTcpRlEnv
 {
   uint32_t nodeId;
   uint32_t socketUid;
   uint8_t envType;
-  int64_t simTime_us;
-  uint32_t ssThresh;
-  uint32_t cWnd;
-  uint32_t segmentSize;
-  uint32_t segmentsAcked;
-  uint32_t bytesInFlight;
+  int64_t simTime_us;           ///< simulation time in microseconds
+  uint32_t ssThresh;            ///< slow start threshold
+  uint32_t cWnd;                ///< size of congestion window
+  uint32_t segmentSize;         ///< length of data segment sent by TCP at one time
+  uint32_t segmentsAcked;       ///< segments that have been acknowledged
+  uint32_t bytesInFlight;       ///< the amount of data that has been sent but not yet acknowledged
   //   int64_t rtt;
   //   int64_t minRtt;
   //   uint32_t calledFunc;
@@ -23,6 +31,13 @@ struct sTcpRlEnv
   //   uint32_t event;
   //   uint32_t ecnState;
 } Packed;
+
+/**
+ * \brief Shared memory to store TCP RL action.
+ * 
+ * This struct is the TCP RL action 
+ * calculated by python and put back to ns-3 with the shared memory.
+ */
 struct TcpRlAct
 {
   uint32_t new_ssThresh;
@@ -35,6 +50,7 @@ struct TcpRlAct
 //   CONGESTION_STATE_SET,
 //   CWND_EVENT,
 // } CalledFunc_t;
+
 class TcpRlEnv : public Ns3AIRL<sTcpRlEnv, TcpRlAct>
 {
 public:

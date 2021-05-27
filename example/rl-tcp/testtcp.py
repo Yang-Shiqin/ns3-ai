@@ -1,22 +1,27 @@
+# should run with ns3 code (cd $YOUR_NS3_CODE; ./waf --run "rl-tcp") simultaneously
 import py_interface
 from ctypes import *
 
 
+# This struct is the environment 
+# shared between ns-3 and python with the same shared memory
+# using the ns3-ai model.
 class TcpRlEnv(Structure):
     _pack_ = 1
     _fields_ = [
         ('nodeId', c_uint32),
         ('socketUid', c_uint32),
         ('envType', c_uint8),
-        ('simTime_us', c_int64),
-        ('ssThresh', c_uint32),
-        ('cWnd', c_uint32),
-        ('segmentSize', c_uint32),
-        ('segmentsAcked', c_uint32),
-        ('bytesInFlight', c_uint32),
+        ('simTime_us', c_int64),        # simulation time in microseconds
+        ('ssThresh', c_uint32),         # slow start threshold
+        ('cWnd', c_uint32),             # size of congestion window
+        ('segmentSize', c_uint32),      # length of data segment sent by TCP at one time
+        ('segmentsAcked', c_uint32),    # segments that have been acknowledged
+        ('bytesInFlight', c_uint32),    # the amount of data that has been sent but not yet acknowledged
     ]
 
-
+# The TCP RL action calculated by python 
+# and put back to ns-3 with the shared memory.
 class TcpRlAct(Structure):
     _pack_ = 1
     _fields_ = [
@@ -24,10 +29,12 @@ class TcpRlAct(Structure):
         ('new_cWnd', c_uint32)
     ]
 
+mempool_key = 1234                                  # memory pool key, arbitrary integer large than 1000
+mem_size = 4096                                     # memory pool size in bytes
+memblock_key = 1234                                 # memory block key, need to keep the same in the ns-3 script
+py_interface.Init(mempool_key, mem_size)            # init shared memory pool
 
-py_interface.Init(1234, 4096)
-
-var = py_interface.Ns3AIRL(1234, TcpRlEnv, TcpRlAct)
+var = py_interface.Ns3AIRL(memblock_key, TcpRlEnv, TcpRlAct)    # Link the shared memory block with ns-3 script
 
 # var = py_interface.ShmBigVar(1234, TcpRl)
 while not var.isFinish():
@@ -38,7 +45,10 @@ while not var.isFinish():
     with var as data:
         if data == None:
             break
+
+    # Reinforcement Learning code there
         print(var.GetVersion())
+        # get the data from ns-3 through the shared memory
         ssThresh = data.env.ssThresh
         cWnd = data.env.cWnd
         segmentsAcked = data.env.segmentsAcked
@@ -66,4 +76,4 @@ while not var.isFinish():
         data.act.new_cWnd = new_cWnd
         data.act.new_ssThresh = new_ssThresh
 
-py_interface.FreeMemory()
+py_interface.FreeMemory()               # Free shared memory pool
