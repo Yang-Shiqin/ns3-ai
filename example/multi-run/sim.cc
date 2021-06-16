@@ -5,6 +5,8 @@
 using namespace std;
 using namespace ns3;
 
+NS_LOG_COMPONENT_DEFINE("multi-run");
+
 /**
  * \brief Shared memory to store a and b.
  * 
